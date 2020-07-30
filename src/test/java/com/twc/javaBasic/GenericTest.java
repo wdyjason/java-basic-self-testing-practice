@@ -3,6 +3,8 @@ package com.twc.javaBasic;
 import com.twc.javaBasic.util.Pair;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GenericTest {
@@ -14,7 +16,7 @@ class GenericTest {
     //  The getMiddle method is a generic method. Now, please call getMiddle method for string
     //  type.
     // <--start
-    final String middle = null;
+    final String middle = getMiddle(words);
     // --end-->
 
     assertEquals("Good", middle);
@@ -53,6 +55,10 @@ class GenericTest {
   //  the declaration of the generic type parameter.
   // <--start
   private static <T> T min(T[] values) {
+    if (values[0] instanceof Number && values[0] instanceof Comparable) {
+      Arrays.sort(values);
+      return values[0];
+    }
     throw new RuntimeException("Not implemented");
   }
   // --end-->
@@ -65,7 +71,21 @@ class GenericTest {
   //  A wildcard is not a type variable, so we can’t write code that uses ? as a type.
   // <--start
   private static void swap(Pair<?> pair) {
-    throw new RuntimeException("Not implemented");
+    try {
+      Field first = pair.getClass().getDeclaredField("first");
+      Field second = pair.getClass().getDeclaredField("second");
+      first.setAccessible(true);
+      second.setAccessible(true);
+
+      Object firstStored = pair.getFirst();
+      first.set(pair, pair.getSecond());
+      second.set(pair, firstStored);
+
+      first.setAccessible(false);
+      second.setAccessible(false);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   // TODO: You can add additional method within the range if you like
